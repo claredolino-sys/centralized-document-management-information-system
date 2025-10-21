@@ -55,19 +55,19 @@ export class FileController {
 
       if (!record_id) {
         // Clean up uploaded file
-        await fs.unlink(file.path);
+        await fs.unlink(file.path).catch(() => {});
         res.status(400).json({ error: 'Record ID is required' });
         return;
       }
 
       // Verify record exists and user has access
-      const [records] = await database.query(
+      const records = await database.query(
         'SELECT * FROM records WHERE id = ?',
         [record_id]
       );
 
-      if (records.length === 0) {
-        await fs.unlink(file.path);
+      if (!Array.isArray(records) || records.length === 0) {
+        await fs.unlink(file.path).catch(() => {});
         res.status(404).json({ error: 'Record not found' });
         return;
       }
@@ -121,27 +121,37 @@ export class FileController {
     try {
       const { id } = req.params;
 
-      const [files] = await database.query<any[]>(
+      const files = await database.query<any[]>(
         'SELECT * FROM record_files WHERE id = ?',
         [id]
       );
 
-      if (files.length === 0) {
+      if (!Array.isArray(files) || files.length === 0) {
         res.status(404).json({ error: 'File not found' });
         return;
       }
 
       const file = files[0];
 
+      // Validate file path to prevent path traversal
+      const uploadDir = path.resolve(config.upload.dir);
+      const filePath = path.resolve(file.file_path);
+      
+      if (!filePath.startsWith(uploadDir)) {
+        logger.error(`Attempted path traversal: ${filePath}`);
+        res.status(403).json({ error: 'Access denied' });
+        return;
+      }
+
       // Check if file exists
       try {
-        await fs.access(file.file_path);
+        await fs.access(filePath);
       } catch {
         res.status(404).json({ error: 'File not found on server' });
         return;
       }
 
-      res.download(file.file_path, file.file_name);
+      res.download(filePath, file.file_name);
     } catch (error) {
       logger.error('Download file error:', error);
       res.status(500).json({ error: 'File download failed' });
@@ -153,23 +163,33 @@ export class FileController {
       const user = req.user!;
       const { id } = req.params;
 
-      const [files] = await database.query<any[]>(
+      const files = await database.query<any[]>(
         'SELECT * FROM record_files WHERE id = ?',
         [id]
       );
 
-      if (files.length === 0) {
+      if (!Array.isArray(files) || files.length === 0) {
         res.status(404).json({ error: 'File not found' });
         return;
       }
 
       const file = files[0];
 
+      // Validate file path to prevent path traversal
+      const uploadDir = path.resolve(config.upload.dir);
+      const filePath = path.resolve(file.file_path);
+      
+      if (!filePath.startsWith(uploadDir)) {
+        logger.error(`Attempted path traversal: ${filePath}`);
+        res.status(403).json({ error: 'Access denied' });
+        return;
+      }
+
       // Delete file from filesystem
       try {
-        await fs.unlink(file.file_path);
+        await fs.unlink(filePath);
       } catch (error) {
-        logger.warn(`Failed to delete file from filesystem: ${file.file_path}`);
+        logger.warn(`Failed to delete file from filesystem: ${filePath}`);
       }
 
       // Delete file record
