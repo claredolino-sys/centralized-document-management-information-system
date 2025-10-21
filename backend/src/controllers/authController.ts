@@ -12,12 +12,12 @@ export class AuthController {
       const { school_id, password } = req.body;
 
       // Find user by school_id
-      const [users] = await database.query<User[]>(
+      const users = await database.query<User[]>(
         'SELECT * FROM users WHERE school_id = ?',
         [school_id]
       );
 
-      if (users.length === 0) {
+      if (!Array.isArray(users) || users.length === 0) {
         res.status(401).json({ error: 'Invalid credentials' });
         return;
       }
@@ -42,11 +42,11 @@ export class AuthController {
 
       const token = jwt.sign(payload, config.jwt.secret, {
         expiresIn: config.jwt.expiresIn,
-      });
+      } as jwt.SignOptions);
 
       const refreshToken = jwt.sign(payload, config.jwt.refreshSecret, {
         expiresIn: config.jwt.refreshExpiresIn,
-      });
+      } as jwt.SignOptions);
 
       logger.info(`User logged in: ${user.school_id}`);
 
@@ -81,12 +81,12 @@ export class AuthController {
       } = req.body;
 
       // Check if user already exists
-      const [existingUsers] = await database.query<User[]>(
+      const existingUsers = await database.query<User[]>(
         'SELECT id FROM users WHERE school_id = ? OR email = ?',
         [school_id, email]
       );
 
-      if (existingUsers.length > 0) {
+      if (Array.isArray(existingUsers) && existingUsers.length > 0) {
         res.status(400).json({ error: 'User already exists' });
         return;
       }
@@ -95,7 +95,7 @@ export class AuthController {
       const password_hash = await bcrypt.hash(password, 10);
 
       // Insert new user
-      const result = await database.query(
+      await database.query(
         `INSERT INTO users (school_id, password_hash, full_name, email, role, department_id) 
          VALUES (?, ?, ?, ?, ?, ?)`,
         [school_id, password_hash, full_name, email, role, department_id]
@@ -134,11 +134,11 @@ export class AuthController {
 
       const token = jwt.sign(payload, config.jwt.secret, {
         expiresIn: config.jwt.expiresIn,
-      });
+      } as jwt.SignOptions);
 
       const newRefreshToken = jwt.sign(payload, config.jwt.refreshSecret, {
         expiresIn: config.jwt.refreshExpiresIn,
-      });
+      } as jwt.SignOptions);
 
       res.json({ token, refreshToken: newRefreshToken });
     } catch (error) {
@@ -151,7 +151,7 @@ export class AuthController {
     try {
       const userId = (req as any).user.userId;
 
-      const [users] = await database.query<User[]>(
+      const users = await database.query<User[]>(
         `SELECT u.*, d.name as department_name 
          FROM users u 
          LEFT JOIN departments d ON u.department_id = d.id 
@@ -159,7 +159,7 @@ export class AuthController {
         [userId]
       );
 
-      if (users.length === 0) {
+      if (!Array.isArray(users) || users.length === 0) {
         res.status(404).json({ error: 'User not found' });
         return;
       }

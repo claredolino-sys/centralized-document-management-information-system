@@ -133,7 +133,7 @@ export class RecordController {
         params.push(user.departmentId);
       }
 
-      const [records] = await database.query<Record[]>(
+      const records = await database.query<Record[]>(
         `SELECT r.*, d.name as department_name, u.full_name as created_by_name
          FROM records r
          LEFT JOIN departments d ON r.department_id = d.id
@@ -142,13 +142,13 @@ export class RecordController {
         params
       );
 
-      if (records.length === 0) {
+      if (!Array.isArray(records) || records.length === 0) {
         res.status(404).json({ error: 'Record not found' });
         return;
       }
 
       // Get associated files
-      const [files] = await database.query(
+      const files = await database.query(
         'SELECT * FROM record_files WHERE record_id = ?',
         [id]
       );
@@ -178,12 +178,12 @@ export class RecordController {
         params.push(user.departmentId);
       }
 
-      const [existingRecords] = await database.query<Record[]>(
+      const existingRecords = await database.query<Record[]>(
         `SELECT * FROM records ${whereClause}`,
         params
       );
 
-      if (existingRecords.length === 0) {
+      if (!Array.isArray(existingRecords) || existingRecords.length === 0) {
         res.status(404).json({ error: 'Record not found or access denied' });
         return;
       }
@@ -248,12 +248,12 @@ export class RecordController {
         return;
       }
 
-      const [existingRecords] = await database.query<Record[]>(
+      const existingRecords = await database.query<Record[]>(
         'SELECT * FROM records WHERE id = ?',
         [id]
       );
 
-      if (existingRecords.length === 0) {
+      if (!Array.isArray(existingRecords) || existingRecords.length === 0) {
         res.status(404).json({ error: 'Record not found' });
         return;
       }

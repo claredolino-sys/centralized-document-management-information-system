@@ -87,12 +87,12 @@ class App {
     );
 
     // Health check endpoint
-    this.app.get(`${apiPrefix}/health`, (req: Request, res: Response) => {
+    this.app.get(`${apiPrefix}/health`, (_req: Request, res: Response) => {
       res.json({ status: 'OK', timestamp: new Date().toISOString() });
     });
 
     // Root endpoint
-    this.app.get('/', (req: Request, res: Response) => {
+    this.app.get('/', (_req: Request, res: Response) => {
       res.json({
         message: 'CDMIS API',
         version: '1.0.0',
@@ -101,7 +101,7 @@ class App {
     });
 
     // 404 handler
-    this.app.use((req: Request, res: Response) => {
+    this.app.use((_req: Request, res: Response) => {
       res.status(404).json({ error: 'Route not found' });
     });
   }

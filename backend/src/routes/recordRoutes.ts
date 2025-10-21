@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { body, query } from 'express-validator';
+import { body } from 'express-validator';
 import { RecordController } from '../controllers/recordController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validateRequest } from '../middleware/validator';

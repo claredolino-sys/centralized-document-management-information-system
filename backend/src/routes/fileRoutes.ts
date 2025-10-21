@@ -1,8 +1,6 @@
 import { Router } from 'express';
-import { body } from 'express-validator';
 import { FileController, upload } from '../controllers/fileController';
 import { authenticate, authorize } from '../middleware/auth';
-import { validateRequest } from '../middleware/validator';
 import { UserRole } from '../types';
 
 const router = Router();
