@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 07, 2025 at 03:50 AM
+-- Generation Time: Oct 22, 2025 at 06:40 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -392,13 +392,21 @@ CREATE TABLE `users` (
   `school_id` varchar(11) NOT NULL COMMENT 'User ID for login, format: 22-1-02642',
   `password_hash` varchar(255) NOT NULL COMMENT 'Stores hashed passwords for security',
   `full_name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
   `role` enum('Admin','Departmental Record Custodian','Staff') NOT NULL,
   `department_id` int(11) DEFAULT NULL COMMENT 'Foreign key to departments table. NULL for Admin.',
   `profile_picture_url` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `school_id`, `password_hash`, `full_name`, `role`, `department_id`, `profile_picture_url`, `created_at`, `updated_at`) VALUES
+(1, '22-1-02242', '0812', '', 'Admin', NULL, NULL, '2025-10-20 07:47:45', '2025-10-22 04:23:31'),
+(7, '19-1-03343', '2398', '', 'Departmental Record Custodian', NULL, NULL, '2025-10-22 04:36:01', '2025-10-22 04:36:01'),
+(9, '15-1-783323', '4537', '', 'Staff', NULL, NULL, '2025-10-22 04:37:18', '2025-10-22 04:37:18');
 
 -- --------------------------------------------------------
 
@@ -464,7 +472,6 @@ ALTER TABLE `record_files`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `school_id` (`school_id`),
-  ADD UNIQUE KEY `email` (`email`),
   ADD KEY `department_id` (`department_id`);
 
 --
@@ -505,7 +512,7 @@ ALTER TABLE `record_files`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables
